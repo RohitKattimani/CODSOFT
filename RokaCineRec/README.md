@@ -11,8 +11,8 @@ A lightweight, high-performance recommendation engine built with Python, Flask, 
 ## Local Setup
 1. Clone the repository and navigate to the folder.
 2. Install dependencies: `pip install -r requirements.txt`
-3. Execute the server: `python app.py`
-4. Access via `http://127.0.0.1:5000`
+3. Execute the server: `uvicorn main:app --reload --port 8000`
+4. Access via ` http://127.0.0.1:8000`
 
 ## How the Algorithm Works
 Instead of relying on user history matrices (Collaborative Filtering), this system relies entirely on item metadata (Content-Based Filtering). It converts movie descriptions into a mathematical matrix of word frequencies, penalizing overly common words (TF-IDF). It then calculates the geometric angle between these movie vectors in multi-dimensional space (Cosine Similarity) to determine which movies are "closest" to one another.
