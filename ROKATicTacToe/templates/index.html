@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROKA Tic-Tac-Toe AI</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f9; padding-top: 50px; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-bottom: 20px; }
+        .cell { width: 100px; height: 100px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-size: 3em; font-weight: bold; cursor: pointer; color: #333; transition: background 0.2s; }
+        .cell:hover { background: #e0e0e0; }
+        .cell.taken { cursor: default; }
+        .cell.X { color: #e74c3c; }
+        .cell.O { color: #3498db; }
+        #message { font-size: 1.5em; font-weight: bold; margin-bottom: 20px; height: 30px; }
+        button { padding: 10px 20px; font-size: 1em; cursor: pointer; background-color: #2c3e50; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #1a252f; }
+    </style>
+</head>
+<body>
+
+    <h1>Play against AI</h1>
+    <div id="message">You are X. It's your turn!</div>
+    
+    <div class="board" id="board">
+        <script>
+            for(let i=0; i<9; i++) {
+                document.write(`<div class="cell" onclick="makeMove(${i})" id="cell-${i}"></div>`);
+            }
+        </script>
+    </div>
+
+    <button onclick="resetBoard()">Restart Game</button>
+
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let gameOver = false;
+
+        function checkWin(b) {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for (let w of wins) {
+                if (b[w[0]] && b[w[0]] === b[w[1]] && b[w[0]] === b[w[2]]) return b[w[0]];
+            }
+            if (!b.includes('')) return 'Tie';
+            return null;
+        }
+
+        async function makeMove(index) {
+            if (board[index] !== '' || gameOver) return;
+
+            // Human Move
+            board[index] = 'X';
+            updateUI();
+            
+            let result = checkWin(board);
+            if (result) return endGame(result);
+
+            document.getElementById('message').innerText = "AI is thinking...";
+
+            // AI Move (Fetch from Python Backend)
+            const response = await fetch('/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ board: board })
+            });
+            const data = await response.json();
+            
+            if (data.move !== -1) {
+                board[data.move] = 'O';
+                updateUI();
+                result = checkWin(board);
+                if (result) return endGame(result);
+                document.getElementById('message').innerText = "Your turn!";
+            }
+        }
+
+        function updateUI() {
+            for (let i = 0; i < 9; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.innerText = board[i];
+                cell.className = `cell ${board[i] !== '' ? 'taken ' + board[i] : ''}`;
+            }
+        }
+
+        function endGame(winner) {
+            gameOver = true;
+            if (winner === 'Tie') document.getElementById('message').innerText = "It's a Tie!";
+            else document.getElementById('message').innerText = `${winner} Wins!`;
+        }
+
+        function resetBoard() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            gameOver = false;
+            document.getElementById('message').innerText = "You are X. It's your turn!";
+            updateUI();
+        }
+    </script>
+</body>
+</html>
