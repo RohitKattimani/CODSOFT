@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RokaCineRec • Movie Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        :root { --tw-color-primary: #00f7ff; }
+        * { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+        .movie-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .movie-card:hover { transform: translateY(-8px) scale(1.04); box-shadow: 0 25px 50px -12px rgb(0 247 255 / 0.2); }
+        .hero-bg { background: linear-gradient(90deg, #0f172a 0%, #1e2937 100%); }
+        .section-header { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+
+    <!-- NAVBAR -->
+    <nav class="glass border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-cyan-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner">🎬</div>
+                <span class="text-3xl font-bold tracking-tighter section-header text-white">RokaCineRec</span>
+                <span class="px-3 py-1 text-xs font-medium bg-cyan-500/10 text-cyan-400 rounded-3xl border border-cyan-400/30">BETA</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a onclick="navigateToSection('explore')" class="hover:text-cyan-400 flex items-center gap-x-1 cursor-pointer">
+                    <i class="fa-solid fa-film"></i>
+                    <span>Explore</span>
+                </a>
+                <a onclick="navigateToSection('recs')" class="hover:text-cyan-400 flex items-center gap-x-1 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Recommendations</span>
+                </a>
+                <a onclick="showHowItWorks()" class="hover:text-cyan-400 flex items-center gap-x-1 cursor-pointer">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>How it works</span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-x-4">
+                <div onclick="showLikedModal()" id="liked-count-badge" class="hidden items-center gap-x-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 h-9 rounded-3xl border border-slate-700 cursor-pointer">
+                    <i class="fa-solid fa-heart text-red-500"></i>
+                    <span id="liked-count" class="font-semibold">0</span>
+                    <span class="text-slate-400 text-xs">liked</span>
+                </div>
+
+                <button onclick="clearLikes()" class="flex items-center gap-x-2 text-xs font-medium px-4 h-9 rounded-3xl border border-slate-700 hover:border-red-400 hover:text-red-400">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>RESET</span>
+                </button>
+
+                <button onclick="toggleMobileMenu()" class="md:hidden text-2xl">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-slate-800 px-8 py-6">
+            <div class="flex flex-col gap-y-6 text-lg">
+                <a onclick="navigateToSection('explore');toggleMobileMenu()" class="flex items-center gap-x-3"><i class="fa-solid fa-film w-5"></i><span>Explore Movies</span></a>
+                <a onclick="navigateToSection('recs');toggleMobileMenu()" class="flex items-center gap-x-3"><i class="fa-solid fa-wand-magic-sparkles w-5"></i><span>Your Recommendations</span></a>
+                <a onclick="showHowItWorks();toggleMobileMenu()" class="flex items-center gap-x-3"><i class="fa-solid fa-circle-info w-5"></i><span>How CineRec Works</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero-bg pt-16 pb-20">
+        <div class="max-w-7xl mx-auto px-8 grid md:grid-cols-12 gap-12 items-center">
+            <div class="md:col-span-7">
+                <div class="inline-flex items-center gap-x-2 bg-cyan-400/10 text-cyan-400 text-sm font-medium px-6 py-2 rounded-3xl mb-6 border border-cyan-400/30">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                    PYTHON FASTAPI BACKEND
+                </div>
+                <h1 class="text-6xl md:text-7xl font-bold leading-none tracking-tighter section-header mb-4">Your next favorite movie is one like away</h1>
+                <p class="text-2xl text-slate-400 max-w-md mb-8">Content-based filtering powered by Python + FastAPI</p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="navigateToSection('explore')" class="bg-white text-slate-950 hover:bg-cyan-400 hover:text-white px-8 h-14 rounded-3xl text-lg font-semibold flex items-center gap-x-3 shadow-2xl shadow-cyan-500/30">START EXPLORING</button>
+                    <button onclick="showHowItWorks()" class="border border-slate-300 hover:border-cyan-400 px-8 h-14 rounded-3xl text-lg font-medium flex items-center gap-x-3">SEE THE ALGORITHM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPLORE SECTION -->
+    <div id="explore" class="max-w-7xl mx-auto px-8 py-16">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <span class="uppercase text-cyan-400 text-sm font-medium tracking-[1px]">STEP 1 • BUILD YOUR TASTE</span>
+                <h2 class="section-header text-5xl font-semibold">Explore &amp; Like Movies</h2>
+                <p class="text-slate-400 mt-2">Click the ❤️ on any movie to add it to your profile</p>
+            </div>
+            <div class="hidden md:flex flex-wrap gap-2" id="genre-filters"></div>
+        </div>
+        <div id="movies-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>
+    </div>
+
+    <!-- RECOMMENDATIONS SECTION -->
+    <div id="recs" class="bg-slate-900 py-16 border-t border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="flex justify-between items-baseline mb-8">
+                <div>
+                    <span class="uppercase text-cyan-400 text-sm font-medium tracking-[1px]">STEP 2 • PYTHON BACKEND</span>
+                    <h2 class="section-header text-5xl font-semibold">Your Personalized Picks</h2>
+                </div>
+                <div id="recs-stats" class="text-right text-sm hidden">
+                    <div class="text-emerald-400 font-medium flex items-center justify-end gap-x-1">Powered by cosine similarity (FastAPI)</div>
+                    <p id="recs-count" class="text-slate-400"></p>
+                </div>
+            </div>
+
+            <div id="recs-empty" class="py-20 text-center">
+                <div class="mx-auto w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center text-5xl mb-6">❤️</div>
+                <h3 class="text-3xl font-medium text-slate-300 mb-3">No recommendations yet</h3>
+                <p class="max-w-xs mx-auto text-slate-400">Like 3 or more movies above to unlock personalized recommendations computed by the Python FastAPI backend.</p>
+                <button onclick="navigateToSection('explore')" class="mt-8 mx-auto flex items-center gap-x-2 bg-white/10 hover:bg-white/20 px-8 py-4 rounded-3xl text-sm font-medium">GO LIKE SOME MOVIES</button>
+            </div>
+
+            <div id="recs-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 hidden"></div>
+        </div>
+    </div>
+
+    <!-- HOW IT WORKS MODAL -->
+    <div onclick="if(event.target.id === 'how-modal')hideHowItWorks()" id="how-modal" class="hidden fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" class="max-w-2xl w-full mx-4 bg-slate-900 rounded-3xl p-8">
+            <h2 class="text-4xl font-semibold mb-8">How CineRec Works</h2>
+            <div class="space-y-8">
+                <div class="flex gap-6">
+                    <div class="w-12 h-12 bg-cyan-400/10 text-cyan-400 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">1</div>
+                    <div><h4 class="font-semibold text-lg">Genre vectors (Python)</h4><p class="text-slate-400">Each movie is converted to a numerical vector using one-hot encoding of genres on the FastAPI backend.</p></div>
+                </div>
+                <div class="flex gap-6">
+                    <div class="w-12 h-12 bg-cyan-400/10 text-cyan-400 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">2</div>
+                    <div><h4 class="font-semibold text-lg">User taste profile</h4><p class="text-slate-400">Liked movies are averaged into a single user taste vector.</p></div>
+                </div>
+                <div class="flex gap-6">
+                    <div class="w-12 h-12 bg-cyan-400/10 text-cyan-400 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">3</div>
+                    <div><h4 class="font-semibold text-lg">Cosine similarity</h4><p class="text-slate-400">The backend computes similarity between your profile and all other movies.</p></div>
+                </div>
+            </div>
+            <button onclick="hideHowItWorks()" class="mt-8 w-full py-4 text-lg font-medium border border-slate-700 hover:bg-slate-800 rounded-3xl">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- LIKED MODAL -->
+    <div onclick="if(event.target.id === 'liked-modal')hideLikedModal()" id="liked-modal" class="hidden fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" class="max-w-2xl w-full mx-4 bg-slate-900 rounded-3xl overflow-hidden">
+            <div class="px-8 pt-8 pb-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-3xl font-semibold">Liked Movies</h3>
+                    <button onclick="hideLikedModal()" class="text-3xl text-slate-400 hover:text-white">×</button>
+                </div>
+            </div>
+            <div id="liked-list" class="max-h-96 overflow-auto px-8 pb-8 grid grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-950 border-t border-slate-800 py-12">
+        <div class="max-w-7xl mx-auto px-8 text-slate-400 text-sm flex flex-col md:flex-row justify-between items-center gap-y-4">
+            <div>Python FastAPI + content-based filtering • Local and Vercel deployable</div>
+        </div>
+    </footer>
+
+    <script>
+        // Complete movie data (must match main.py exactly)
+        const moviesData = [
+            {"id":1,"title":"Inception","genres":["Action","Sci-Fi","Thriller"],"description":"A thief who steals corporate secrets through dream-sharing technology.","poster":"https://picsum.photos/id/1015/320/420","imdbRating":8.8},
+            {"id":2,"title":"The Matrix","genres":["Action","Sci-Fi"],"description":"A computer hacker discovers the shocking truth about his reality.","poster":"https://picsum.photos/id/133/320/420","imdbRating":8.7},
+            {"id":3,"title":"Interstellar","genres":["Adventure","Drama","Sci-Fi"],"description":"Explorers travel through a wormhole in search of a new home for humanity.","poster":"https://picsum.photos/id/160/320/420","imdbRating":8.7},
+            {"id":4,"title":"Dune: Part Two","genres":["Action","Adventure","Drama","Sci-Fi"],"description":"Paul Atreides unites with Chani and the Fremen people in a war for the universe.","poster":"https://picsum.photos/id/201/320/420","imdbRating":8.8},
+            {"id":5,"title":"Oppenheimer","genres":["Biography","Drama","History"],"description":"The story of the American scientist who developed the atomic bomb.","poster":"https://picsum.photos/id/211/320/420","imdbRating":8.4},
+            {"id":6,"title":"Parasite","genres":["Drama","Thriller"],"description":"Greed and class discrimination threaten a poor family’s new relationship with the rich.","poster":"https://picsum.photos/id/29/320/420","imdbRating":8.5},
+            {"id":7,"title":"Everything Everywhere All at Once","genres":["Action","Adventure","Comedy","Sci-Fi"],"description":"An aging Chinese immigrant is swept into an insane multiverse adventure.","poster":"https://picsum.photos/id/1009/320/420","imdbRating":7.8},
+            {"id":8,"title":"Mad Max: Fury Road","genres":["Action","Adventure","Sci-Fi"],"description":"In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler.","poster":"https://picsum.photos/id/1016/320/420","imdbRating":8.1},
+            {"id":9,"title":"La La Land","genres":["Comedy","Drama","Musical","Romance"],"description":"A jazz pianist and an aspiring actress fall in love while chasing their dreams.","poster":"https://picsum.photos/id/870/320/420","imdbRating":8.0},
+            {"id":10,"title":"The Grand Budapest Hotel","genres":["Adventure","Comedy","Drama"],"description":"The adventures of a legendary concierge and a lobby boy at a famous hotel.","poster":"https://picsum.photos/id/1011/320/420","imdbRating":8.1},
+            {"id":11,"title":"Joker","genres":["Crime","Drama","Thriller"],"description":"A failed comedian descends into madness and becomes the criminal mastermind Joker.","poster":"https://picsum.photos/id/1020/320/420","imdbRating":8.4},
+            {"id":12,"title":"Spider-Man: Across the Spider-Verse","genres":["Animation","Action","Adventure"],"description":"Miles Morales embarks on an epic journey across the multiverse with other Spider-People.","poster":"https://picsum.photos/id/1040/320/420","imdbRating":8.6}
+        ];
+
+        let allGenres = [];
+        let currentFilterGenre = null;
+
+        function getAllGenres() {
+            const set = new Set();
+            moviesData.forEach(m => m.genres.forEach(g => set.add(g)));
+            return Array.from(set).sort();
+        }
+
+        function renderMovieCard(movie, isLiked = false, similarity = null) {
+            return `
+            <div onclick="handleCardClick(${movie.id}, event)" class="movie-card bg-slate-900 border border-slate-700 hover:border-cyan-400 rounded-3xl overflow-hidden group cursor-pointer">
+                <div class="relative">
+                    <img src="${movie.poster}" alt="${movie.title}" class="w-full aspect-[4/5] object-cover">
+                    <button onclick="event.stopImmediatePropagation(); toggleLike(${movie.id});" class="absolute top-4 right-4 w-9 h-9 bg-black/60 hover:bg-red-500/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl ${isLiked ? 'text-red-500' : 'text-white/70'}">
+                        <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                    </button>
+                    <div class="absolute top-4 left-4 bg-black/70 text-white text-xs font-mono px-3 py-1 rounded-3xl flex items-center gap-x-1">
+                        <i class="fa-solid fa-star text-yellow-400"></i> ${movie.imdbRating}
+                    </div>
+                    ${similarity !== null ? `<div class="absolute bottom-4 left-4 bg-emerald-400 text-emerald-950 text-xs font-bold px-3 py-px rounded-3xl flex items-center">${Math.round(similarity * 100)}% MATCH</div>` : ''}
+                </div>
+                <div class="p-5">
+                    <h4 class="font-semibold text-lg leading-none mb-2">${movie.title}</h4>
+                    <div class="flex flex-wrap gap-1">
+                        ${movie.genres.map(g => `<span class="text-[10px] bg-slate-800 text-slate-300 px-3 py-px rounded-3xl">${g}</span>`).join('')}
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4 line-clamp-2">${movie.description}</p>
+                </div>
+            </div>`;
+        }
+
+        function renderMoviesGrid(filtered = moviesData) {
+            const container = document.getElementById('movies-grid');
+            container.innerHTML = '';
+            const likedIds = JSON.parse(localStorage.getItem('cineRec_liked') || '[]');
+            filtered.forEach(movie => {
+                const isLiked = likedIds.includes(movie.id);
+                container.innerHTML += renderMovieCard(movie, isLiked);
+            });
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400">No movies match your filter</div>`;
+            }
+        }
+
+        async function fetchRecommendations(likedIds) {
+            if (likedIds.length === 0) return [];
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ liked_ids: likedIds })
+                });
+                if (!response.ok) throw new Error('API error');
+                const data = await response.json();
+                return data.recommendations || [];
+            } catch (e) {
+                console.error('Backend error:', e);
+                return [];
+            }
+        }
+
+        async function renderRecommendations() {
+            const likedIds = JSON.parse(localStorage.getItem('cineRec_liked') || '[]');
+            const recs = await fetchRecommendations(likedIds);
+            const container = document.getElementById('recs-grid');
+            const empty = document.getElementById('recs-empty');
+            if (recs.length === 0) {
+                empty.classList.remove('hidden');
+                container.classList.add('hidden');
+                document.getElementById('recs-stats').classList.add('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+            container.classList.remove('hidden');
+            document.getElementById('recs-stats').classList.remove('hidden');
+            document.getElementById('recs-count').innerHTML = `Showing <span class="font-semibold text-cyan-400">${recs.length}</span> movies`;
+            container.innerHTML = '';
+            recs.forEach(movie => {
+                container.innerHTML += renderMovieCard(movie, false, movie.similarity);
+            });
+        }
+
+        function renderGenreFilters() {
+            const container = document.getElementById('genre-filters');
+            container.innerHTML = `<span onclick="filterByGenre(null)" class="cursor-pointer text-xs bg-slate-800 hover:bg-cyan-400 hover:text-slate-950 px-5 py-2 rounded-3xl">ALL</span>`;
+            allGenres.forEach(genre => {
+                const pill = document.createElement('span');
+                pill.className = 'cursor-pointer text-xs bg-slate-800 hover:bg-cyan-400 hover:text-slate-950 px-5 py-2 rounded-3xl';
+                pill.textContent = genre;
+                pill.onclick = () => filterByGenre(genre);
+                container.appendChild(pill);
+            });
+        }
+
+        function renderLikedModal() {
+            const likedIds = JSON.parse(localStorage.getItem('cineRec_liked') || '[]');
+            const likedMovies = moviesData.filter(m => likedIds.includes(m.id));
+            const container = document.getElementById('liked-list');
+            container.innerHTML = likedMovies.length 
+                ? likedMovies.map(movie => `
+                    <div onclick="toggleLike(${movie.id});hideLikedModal()" class="text-center cursor-pointer">
+                        <img src="${movie.poster}" class="rounded-3xl mx-auto mb-3 shadow-md w-full">
+                        <p class="font-medium text-sm">${movie.title}</p>
+                    </div>`).join('')
+                : `<div class="col-span-3 py-12 text-center text-slate-400">You haven't liked any movies yet.</div>`;
+        }
+
+        function toggleLike(id) {
+            let liked = JSON.parse(localStorage.getItem('cineRec_liked') || '[]');
+            if (liked.includes(id)) {
+                liked = liked.filter(i => i !== id);
+            } else {
+                liked.push(id);
+            }
+            localStorage.setItem('cineRec_liked', JSON.stringify(liked));
+            updateUI();
+        }
+
+        function handleCardClick(id, e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+        }
+
+        function clearLikes() {
+            if (confirm('Clear all your liked movies?')) {
+                localStorage.removeItem('cineRec_liked');
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            const likedIds = JSON.parse(localStorage.getItem('cineRec_liked') || '[]');
+            const badge = document.getElementById('liked-count-badge');
+            const countEl = document.getElementById('liked-count');
+            if (likedIds.length > 0) {
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+                countEl.textContent = likedIds.length;
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+            renderMoviesGrid(currentFilterGenre ? moviesData.filter(m => m.genres.includes(currentFilterGenre)) : moviesData);
+            renderRecommendations();
+        }
+
+        function filterByGenre(genre) {
+            currentFilterGenre = genre;
+            renderMoviesGrid(genre ? moviesData.filter(m => m.genres.includes(genre)) : moviesData);
+            document.querySelectorAll('#genre-filters span').forEach(el => {
+                if (genre === null && el.textContent === 'ALL') el.classList.add('!bg-cyan-400', '!text-slate-950');
+                else if (el.textContent === genre) el.classList.add('!bg-cyan-400', '!text-slate-950');
+                else el.classList.remove('!bg-cyan-400', '!text-slate-950');
+            });
+        }
+
+        function navigateToSection(section) {
+            document.getElementById(section).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showHowItWorks() {
+            document.getElementById('how-modal').classList.remove('hidden');
+            document.getElementById('how-modal').classList.add('flex');
+        }
+
+        function hideHowItWorks() {
+            const modal = document.getElementById('how-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function showLikedModal() {
+            renderLikedModal();
+            document.getElementById('liked-modal').classList.remove('hidden');
+            document.getElementById('liked-modal').classList.add('flex');
+        }
+
+        function hideLikedModal() {
+            const modal = document.getElementById('liked-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            updateUI();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function initializeApp() {
+            allGenres = getAllGenres();
+            renderGenreFilters();
+            renderMoviesGrid();
+            renderRecommendations();
+            console.log('CineRec Python FastAPI app initialized');
+        }
+
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>
